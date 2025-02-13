@@ -4,6 +4,24 @@ const client = new pg.Client(
   "postgres://postgres:2182@localhost:5432/acme_dining_db"
 );
 
+const fetchCustomers = async () => {
+  const SQL = `SELECT * FROM customers`;
+  const response = await client.query(SQL);
+  return response.rows;
+};
+
+const fetchRestaurants = async () => {
+  const SQL = `SELECT * FROM restaurants`;
+  const response = await client.query(SQL);
+  return response.rows;
+};
+
+const fetchReservations = async () => {
+  const SQL = `SELECT * FROM reservations`;
+  const response = await client.query(SQL);
+  return response.rows;
+};
+
 const createCustomer = async (customerName) => {
   const SQL = `
 INSERT INTO customers(id, name) VALUES($1, $2) RETURNING *`;
@@ -19,20 +37,29 @@ const createRestaurant = async (restaurantName) => {
 };
 
 const createReservation = async (
-  customerName,
+{  customerName,
   restaurantName,
   date,
-  partyCount
+ partyCount,}
 ) => {
   const SQL = `
-    INSERT INTO reservations(id, date, party_count, restaurant_id, customer_id) VALUES($1, $2, $3, (SELECT id FROM restaurants WHERE name = $4), (SELECT id FROM customers WHERE name = $5)) RETURNING *`;
+    INSERT INTO reservations(id, date, party_count, restaurant_id, customer_id) 
+    VALUES($1, $2, $3, (SELECT id FROM restaurants WHERE name = $4), (SELECT id FROM customers WHERE name = $5)) 
+    RETURNING *`;
   const result = await client.query(SQL, [
     uuid.v4(),
     date,
     partyCount,
     restaurantName,
-    customerName,
+    customerName
   ]);
+  return result.rows[0];
+};
+
+const destroyReservation = async (id, customer_id) => {
+  const SQL = `DELETE FROM reservations
+  WHERE id = $1 and customer_id = $2`;
+  const result = await client.query(SQL, [id, customer_id]);
   return result.rows[0];
 };
 
@@ -74,12 +101,16 @@ customer_id UUID REFERENCES customers(id) NOT NULL
     console.log("restaurant created: " + name);
   });
 
-  await createReservation("Bob", "Nobu", "2025-02-14", 2);
+  await createReservation({customerName:"Bob", restaurantName:"Nobu", date:"2025-02-14", partyCount:2});
 };
 
 module.exports = {
   init,
   createCustomer,
   createRestaurant,
-  createReservation
+  createReservation,
+  fetchCustomers,
+  fetchRestaurants,
+  fetchReservations,
+  destroyReservation,
 };
