@@ -42,14 +42,14 @@ app.post("/api/customers", async (req, res, next) => {
 
 app.post("/api/customers/:customer_id/reservations", async (req, res, next) => {
   const { customer_id } = req.params;
-  const { restaurant_id, date, party_count } = req.body;
+  const { restaurantName, date, partyCount, customerName } = req.body;
 
   try {
     const response = await db.createReservation({
-      customerName: customer_id,
-      restaurantName: restaurant_id,
+      customerName: customerName,
+      restaurantName: restaurantName,
       date: date,
-      partyCount: party_count,
+      partyCount: partyCount,
     });
     res.sendStatus(201).json(response);
   } catch (ex) {
@@ -60,7 +60,7 @@ app.post("/api/customers/:customer_id/reservations", async (req, res, next) => {
 app.delete(
   "/api/customers/:customer_id/reservations/:id",
   async (req, res, next) => {
-    const {id, customer_id} = req.params;
+    const { id, customer_id } = req.params;
     try {
       await db.createReservation({
         id: id,

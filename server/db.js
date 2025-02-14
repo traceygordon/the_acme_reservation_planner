@@ -37,14 +37,14 @@ const createRestaurant = async (restaurantName) => {
 };
 
 const createReservation = async (
-{  customerName,
-  restaurantName,
-  date,
- partyCount,}
+  { customerName,
+    restaurantName,
+    date,
+    partyCount, }
 ) => {
   const SQL = `
-    INSERT INTO reservations(id, date, party_count, restaurant_id, customer_id) 
-    VALUES($1, $2, $3, (SELECT id FROM restaurants WHERE name = $4), (SELECT id FROM customers WHERE name = $5)) 
+    INSERT INTO reservations(id, date, party_count, restaurant_id, customer_id)
+    VALUES($1, $2, $3, (SELECT id FROM restaurants WHERE name = $4), (SELECT id FROM customers WHERE name = $5))
     RETURNING *`;
   const result = await client.query(SQL, [
     uuid.v4(),
@@ -101,7 +101,7 @@ customer_id UUID REFERENCES customers(id) NOT NULL
     console.log("restaurant created: " + name);
   });
 
-  await createReservation({customerName:"Bob", restaurantName:"Nobu", date:"2025-02-14", partyCount:2});
+  await createReservation({ customerName: "Bob", restaurantName: "Nobu", date: "2025-02-14", partyCount: 2 });
 };
 
 module.exports = {
